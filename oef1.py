@@ -1,18 +1,40 @@
-import OPi.GPIO as GPIO
-import time
+import wiringpi as wp
 
-# Set up GPIO
-GPIO.setboard(GPIO.PCPCPLUS) # Set the board to PC Plus
-GPIO.setmode(GPIO.SUNXI) # Set the mode to SUNXI pin numbering
-GPIO.setup("PA10", GPIO.OUT) # Set up pin PA10 as an output pin
+# set up pins
+IN1 = 0
+IN2 = 1
+IN3 = 2
+IN4 = 3
 
-# Loop forever
+# set pin modes
+wiringpi.wiringPiSetup()
+wiringpi.pinMode(IN1, wiringpi.OUTPUT)
+wiringpi.pinMode(IN2, wiringpi.OUTPUT)
+wiringpi.pinMode(IN3, wiringpi.OUTPUT)
+wiringpi.pinMode(IN4, wiringpi.OUTPUT)
+
+# define step sequence
+step_sequence = [
+    [1, 0, 0, 1],
+    [1, 0, 0, 0],
+    [1, 1, 0, 0],
+    [0, 1, 0, 0],
+    [0, 1, 1, 0],
+    [0, 0, 1, 0],
+    [0, 0, 1, 1],
+    [0, 0, 0, 1]
+]
+
+# set initial values
+step_count = len(step_sequence)
+current_step = 0
+
+# rotate motor
 while True:
-    # Turn on the LED
-    GPIO.output("PA10", GPIO.HIGH)
-    # Wait for half a second
-    time.sleep(0.5)
-    # Turn off the LED
-    GPIO.output("PA10", GPIO.LOW)
-    # Wait for half a second
-    time.sleep(0.5)
+    for pin in range(4):
+        value = step_sequence[current_step][pin]
+        wiringpi.digitalWrite(IN1+pin, value)
+    current_step += 1
+    if current_step == step_count:
+        current_step = 0
+    time.sleep(0.01)
